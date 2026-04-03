@@ -8,13 +8,13 @@ const PORT = process.env.PORT || 3001;
 
 // ─── CORS ────────────────────────────────────────────────────────────────────
 // Allow requests from your Vercel frontend (set FRONTEND_URL in Render env vars)
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "*",
-    methods: ["POST", "GET"],
-  })
-);
-
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
