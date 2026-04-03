@@ -62,19 +62,26 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // Convert buffer to base64
-    const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "uploads" },
+      (error, result) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ error: "Cloud upload failed" });
+        }
 
-    const result = await cloudinary.uploader.upload(base64);
+        res.json({
+          message: "Uploaded to cloud",
+          url: result.secure_url,
+        });
+      }
+    );
 
-    res.json({
-      message: "Uploaded to cloud",
-      url: result.secure_url,
-    });
+    stream.end(req.file.buffer); // ✅ IMPORTANT LINE
 
   } catch (err) {
-    console.error("[/upload]", err.message);
-    res.status(500).json({ error: "Cloud upload failed" });
+    console.error(err);
+    res.status(500).json({ error: "Upload failed" });
   }
 });
 app.post("/compress", upload.single("file"), async (req, res) => {
