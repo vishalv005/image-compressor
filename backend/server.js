@@ -56,7 +56,7 @@ app.get("/", (_req, res) => res.json({ status: "ok", message: "Image Compressor 
  *     reduction:      string  (e.g. "42.30")
  *   }
  */
-app.post("/upload", upload.single("image"), async (req, res) => {
+app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
