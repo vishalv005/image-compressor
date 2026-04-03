@@ -57,17 +57,21 @@ app.get("/", (_req, res) => res.json({ status: "ok", message: "Image Compressor 
  *   }
  */
 app.post("/upload", upload.single("file"), async (req, res) => {
+  console.log("🚀 Upload route hit");   // 👈 ADD THIS LINE
+
   try {
     if (!req.file) {
+      console.log("❌ No file received");
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    console.log("File received:", req.file);
+    console.log("✅ File received:", req.file.mimetype);
 
-    // 🔥 Upload using BUFFER (NOT path)
     const result = await cloudinary.uploader.upload(
       `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
     );
+
+    console.log("✅ Uploaded to Cloudinary:", result.secure_url);
 
     res.json({
       message: "Uploaded to cloud",
@@ -75,8 +79,8 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     });
 
   } catch (err) {
-    console.error("UPLOAD ERROR FULL:", err);
-    console.error("MESSAGE:", err.message);
+    console.error("❌ UPLOAD ERROR FULL:", err);
+    console.error("❌ MESSAGE:", err.message);
 
     res.status(500).json({
       error: err.message,
