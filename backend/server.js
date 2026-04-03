@@ -58,25 +58,27 @@ app.get("/", (_req, res) => res.json({ status: "ok", message: "Image Compressor 
  */
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
+    console.log("CLOUD_NAME:", process.env.CLOUD_NAME);
+    console.log("API_KEY:", process.env.API_KEY);
+    console.log("API_SECRET:", process.env.API_SECRET ? "exists" : "missing");
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
     const stream = cloudinary.uploader.upload_stream(
-      { folder: "uploads" },
-      (error, result) => {
-        if (error) {
-          console.error(error);
-          return res.status(500).json({ error: "Cloud upload failed" });
-        }
+  { folder: "uploads" },
+  (error, result) => {
+    if (error) {
+      console.error("🔥 Cloudinary ERROR:", error); // ✅ ADD THIS
+      return res.status(500).json({ error: "Cloud upload failed" });
+    }
 
-        res.json({
-          message: "Uploaded to cloud",
-          url: result.secure_url,
-        });
-      }
-    );
-
+    res.json({
+      message: "Uploaded to cloud",
+      url: result.secure_url,
+    });
+  }
+);
     stream.end(req.file.buffer); // ✅ IMPORTANT LINE
 
   } catch (err) {
