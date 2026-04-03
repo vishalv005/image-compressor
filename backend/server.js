@@ -2,7 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const sharp = require("sharp");
 const cors = require("cors");
-
+const cloudinary = require("cloudinary").v2;
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -16,6 +16,11 @@ app.use(
 );
 
 app.use(express.json());
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 // ─── MULTER (memory storage — no disk writes) ─────────────────────────────────
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -51,6 +56,27 @@ app.get("/", (_req, res) => res.json({ status: "ok", message: "Image Compressor 
  *     reduction:      string  (e.g. "42.30")
  *   }
  */
+app.post("/upload", upload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // Convert buffer to base64
+    const base64 = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+
+    const result = await cloudinary.uploader.upload(base64);
+
+    res.json({
+      message: "Uploaded to cloud",
+      url: result.secure_url,
+    });
+
+  } catch (err) {
+    console.error("[/upload]", err.message);
+    res.status(500).json({ error: "Cloud upload failed" });
+  }
+});
 app.post("/compress", upload.single("file"), async (req, res) => {
   try {
     // ── Validate file presence ───────────────────────────────────────────────

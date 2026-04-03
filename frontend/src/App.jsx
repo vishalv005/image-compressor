@@ -6,13 +6,30 @@ import ImagePreview from "./components/ImagePreview";
 
 export default function App() {
   const [quality, setQuality] = useState(75);
+  const [cloudUrl, setCloudUrl] = useState("");
   const {
     file, originalPreview, originalSize,
     compressedPreview, compressedSize, reduction,
     loading, error,
     selectFile, compress, download, reset,
   } = useCompressor();
+  const handleUpload = async () => {
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
 
+    const res = await fetch("https://image-compressor-gbhb.onrender.com/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    setCloudUrl(data.url);
+
+  } catch (err) {
+    console.error("Upload error:", err);
+  }
+};
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans">
       {/* ── Header ──────────────────────────────────────────────────────────── */}
@@ -112,18 +129,33 @@ export default function App() {
               </button>
 
               {compressedPreview && (
-                <button
-                  onClick={download}
-                  className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500
-                    text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 active:scale-[0.98]"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
-                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                  Download
-                </button>
-              )}
+  <>
+    <button
+      onClick={download}
+      className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500
+        text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 active:scale-[0.98]"
+    >
+      Download
+    </button>
+
+    <button
+      onClick={handleUpload}
+      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500
+        text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 active:scale-[0.98]"
+    >
+      ☁️ Upload
+    </button>
+    {cloudUrl && (
+  <div className="mt-4">
+    <p className="text-sm text-slate-400">Stored in Cloud:</p>
+    <img src={cloudUrl} className="w-40 rounded-lg mt-2" />
+    <a href={cloudUrl} target="_blank" className="text-blue-400 underline">
+      Open Image
+    </a>
+  </div>
+)}
+  </>
+)}
             </div>
           </div>
         )}
