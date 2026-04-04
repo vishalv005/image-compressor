@@ -16,7 +16,7 @@ export default function App() {
   const handleUpload = async () => {
   try {
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("file", file);
 
     const res = await fetch("https://image-compressor-gbhb.onrender.com/upload", {
       method: "POST",
